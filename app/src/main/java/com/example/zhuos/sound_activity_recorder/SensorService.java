@@ -1,6 +1,7 @@
 package com.example.zhuos.sound_activity_recorder;
 
 import android.app.ActivityManager;
+import android.app.AndroidAppHelper;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -42,6 +43,7 @@ import android.widget.LinearLayout.LayoutParams;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XposedBridge;
+import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class SensorService extends Service implements OnTouchListener {
@@ -52,6 +54,10 @@ public class SensorService extends Service implements OnTouchListener {
     private SoundMeter soundMeter;
     private Accelerometer accelerometer;
     private Gyroscope gyroscope;
+    private GravitySensor gravitySensor;
+
+
+    private ActivitySensor activitySensor;
 
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
@@ -65,7 +71,7 @@ public class SensorService extends Service implements OnTouchListener {
 
 
     private int sound;
-    private float accX, accY, accZ,rotX,rotY,rotZ;
+    private float accX, accY, accZ,rotX,rotY,rotZ,graX,graY,graZ;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -78,12 +84,6 @@ public class SensorService extends Service implements OnTouchListener {
         return false;
     }
 
-//    @Override
-//    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
-//        XposedBridge.log("Loaded app: " + lpparam.packageName);
-//        Log.d("testing:","Loaded app: " + lpparam.packageName);
-//
-//    }
 
     public class LocalBinder extends Binder {
         SensorService getService() {
@@ -138,6 +138,12 @@ public class SensorService extends Service implements OnTouchListener {
         gyroscope = new Gyroscope(this);
         gyroscope.mSensorManager.registerListener(gyroscope, gyroscope.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
+        gravitySensor = new GravitySensor(this);
+        gravitySensor.mSensorManager.registerListener(gravitySensor, gravitySensor.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+        //activitySensor = new ActivitySensor();
+
+
         timerHandler.postDelayed(timerRunnable, 0);
 
 
@@ -185,12 +191,21 @@ public class SensorService extends Service implements OnTouchListener {
     }
 
     private void checkCurrent() {
-//        ActivityManager.RunningTaskInfo foregroundTaskInfo = am.getRunningTasks(1).get(0);
-////        String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
-////        Log.d("testing:", "package name: "+foregroundTaskPackageName);
+        ActivityManager.RunningTaskInfo foregroundTaskInfo = am.getRunningTasks(1).get(0);
+        String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
+        if (foregroundTaskPackageName.equals("com.sec.android.app.launcher")){
+            Log.d("testing:", "package name xxx: "+foregroundTaskPackageName);
+        } else{
+
+            String s  = XposedHelpers.findField(ActivitySensor.class,"currentName").toString();
+
+            Log.d("testing:", "package name xxx: "+ s);
+        }
+
 
 //        String packageName =  ProcessManager.getRunningForegroundApps(getApplicationContext()).get(0).getPackageName();
 //        Log.d("testing:","current app: " + currentApp);
+
 
 
 
@@ -233,6 +248,9 @@ public class SensorService extends Service implements OnTouchListener {
             rotX = gyroscope.getX();
             rotY = gyroscope.getY();
             rotZ = gyroscope.getZ();
+            graX = gravitySensor.getX();
+            graY = gravitySensor.getY();
+            graZ = gravitySensor.getZ();
 
             Log.d("output:", "getting data " + sound);
 
@@ -243,6 +261,8 @@ public class SensorService extends Service implements OnTouchListener {
 
             outputFile(send);
             checkCurrent();
+
+
 
             timerHandler.postDelayed(this, 200);
         }
@@ -274,5 +294,17 @@ public class SensorService extends Service implements OnTouchListener {
 
     public float getRotZ() {
         return rotZ;
+    }
+
+    public float getGraX() {
+        return graX;
+    }
+
+    public float getGraY() {
+        return graY;
+    }
+
+    public float getGraZ() {
+        return graZ;
     }
 }

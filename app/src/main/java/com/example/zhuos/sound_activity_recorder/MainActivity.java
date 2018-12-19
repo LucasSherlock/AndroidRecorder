@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     //private Accelerometer accelerometer;
 
-    TextView timerTextView, accX, accY, accZ,rotX,rotY,rotZ;
+    TextView timerTextView, accX, accY, accZ,rotX,rotY,rotZ, graX,graY,graZ;
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
 
 
@@ -76,6 +76,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 rotX.setText("rot X : " + service.getRotX());
                 rotY.setText("rot Y : " + service.getRotY());
                 rotZ.setText("rot Z : " + service.getRotZ());
+                graX.setText("gra X : " + service.getGraX());
+                graY.setText("gra Y : " + service.getGraY());
+                graZ.setText("gra Z : " + service.getGraZ());
             } else {
                 Log.d("testing:", " null");
             }
@@ -114,6 +117,9 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         rotX = (TextView) findViewById(R.id.rotX);
         rotY = (TextView) findViewById(R.id.rotY);
         rotZ = (TextView) findViewById(R.id.rotZ);
+        graX = (TextView) findViewById(R.id.graX);
+        graY = (TextView) findViewById(R.id.graY);
+        graZ = (TextView) findViewById(R.id.graZ);
 
 
         Button b = (Button) findViewById(R.id.button);

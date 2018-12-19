@@ -4,19 +4,19 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    tools:layout_editor_absoluteY="81dp">
 
     <TextView
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="136dp"
-        android:layout_marginLeft="136dp"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="150dp"
+        android:layout_marginBottom="12dp"
         android:text="TextView"
         android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/rotY"
+        app:layout_constraintBottom_toTopOf="@+id/accX"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,31 +24,30 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="132dp"
-        android:layout_marginLeft="132dp"
-        android:layout_marginTop="248dp"
+        android:layout_marginEnd="9dp"
+        android:layout_marginRight="9dp"
         android:text="Button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/connectBtn"
+        app:layout_constraintEnd_toEndOf="@+id/connectBtn"
+        app:layout_constraintTop_toBottomOf="@+id/rotZ" />
 
     <Button
         android:id="@+id/connectBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
         android:text="Connect"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.444"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/activity"
+        app:layout_constraintStart_toStartOf="@+id/activity"
         app:layout_constraintTop_toBottomOf="@+id/button" />
 
     <TextView
         android:id="@+id/accX"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginBottom="4dp"
         android:text="TextView"
         android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/accY"
         app:layout_constraintStart_toStartOf="@+id/timerTextView"
         app:layout_constraintTop_toBottomOf="@+id/timerTextView" />
 
@@ -56,9 +55,9 @@
         android:id="@+id/accY"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:text="TextView"
         android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/accZ"
         app:layout_constraintStart_toStartOf="@+id/accX"
         app:layout_constraintTop_toBottomOf="@+id/accX" />
 
@@ -66,8 +65,10 @@
         android:id="@+id/accZ"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="23dp"
         android:text="TextView"
         android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/rotY"
         app:layout_constraintStart_toStartOf="@+id/accY"
         app:layout_constraintTop_toBottomOf="@+id/accY" />
 
@@ -75,47 +76,104 @@
         android:id="@+id/activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="34dp"
+        android:layout_marginStart="136dp"
+        android:layout_marginLeft="136dp"
+        android:layout_marginBottom="47dp"
         android:text="Button"
-        app:layout_constraintStart_toStartOf="@+id/connectBtn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/connectBtn" />
 
     <TextView
         android:id="@+id/rotX"
         android:layout_width="0dp"
-        android:layout_height="27dp"
-        android:layout_marginTop="47dp"
-        android:layout_marginBottom="46dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginLeft="28dp"
+        android:layout_marginEnd="17dp"
+        android:layout_marginRight="17dp"
         android:text="TextView"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="@+id/rotY"
-        app:layout_constraintStart_toStartOf="@+id/rotY"
-        app:layout_constraintTop_toTopOf="@+id/accZ" />
+        app:layout_constraintBottom_toTopOf="@+id/rotZ"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/graY"
+        app:layout_constraintHorizontal_bias="0.149"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/rotY" />
 
     <TextView
         android:id="@+id/rotZ"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginBottom="267dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginLeft="28dp"
+        android:layout_marginEnd="17dp"
+        android:layout_marginRight="17dp"
+        android:layout_marginBottom="54dp"
         android:text="TextView"
         android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/button"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/graZ"
+        app:layout_constraintHorizontal_bias="0.149"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rotY" />
+        app:layout_constraintTop_toBottomOf="@+id/rotX" />
 
     <TextView
         android:id="@+id/rotY"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginLeft="26dp"
+        android:layout_marginEnd="17dp"
+        android:layout_marginRight="17dp"
         android:text="TextView"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/rotZ"
-        app:layout_constraintEnd_toEndOf="@+id/rotZ"
-        app:layout_constraintStart_toStartOf="@+id/rotZ"
-        app:layout_constraintTop_toBottomOf="@+id/timerTextView" />
+        app:layout_constraintBottom_toTopOf="@+id/rotX"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/graX"
+        app:layout_constraintHorizontal_bias="0.14"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/accZ" />
+
+    <TextView
+        android:id="@+id/graX"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="183dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginRight="11dp"
+        android:layout_marginBottom="1dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/graY"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/rotY"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/graZ"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginRight="11dp"
+        android:layout_marginBottom="239dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/rotZ"
+        app:layout_constraintTop_toBottomOf="@+id/graY" />
+
+    <TextView
+        android:id="@+id/graY"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginRight="11dp"
+        android:layout_marginBottom="1dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/graZ"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/rotX"
+        app:layout_constraintTop_toBottomOf="@+id/graX" />
 
 </android.support.constraint.ConstraintLayout>
