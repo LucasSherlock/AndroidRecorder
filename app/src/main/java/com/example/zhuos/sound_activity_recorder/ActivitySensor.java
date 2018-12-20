@@ -15,15 +15,11 @@ public class ActivitySensor extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("testing:",intent.getAction());
          currentActivity = intent.getStringExtra("currentActivity");
-        String temp = intent.getStringExtra("currentActivity");
         Log.d("testing:","from activity sensor:  "+currentActivity);
-        //Log.d("testing:","from activity sensor xxx:  "+temp);
     }
 
     public String getCurrentActivity() {
-        //Log.d("testing:","from activity sensor:  "+currentActivity);
         return currentActivity;
     }
 }

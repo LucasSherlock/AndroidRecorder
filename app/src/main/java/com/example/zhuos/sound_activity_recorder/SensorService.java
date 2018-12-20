@@ -42,7 +42,6 @@ public class SensorService extends Service implements OnTouchListener {
     private ActivitySensor activitySensor;
 
 
-
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
     OutputStream outputStream;
@@ -54,7 +53,7 @@ public class SensorService extends Service implements OnTouchListener {
 
 
     private int sound;
-    private float accX, accY, accZ,rotX,rotY,rotZ,graX,graY,graZ;
+    private float accX, accY, accZ, rotX, rotY, rotZ, graX, graY, graZ;
     private String currentActivity;
 
     @Override
@@ -110,7 +109,6 @@ public class SensorService extends Service implements OnTouchListener {
         currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
 
 
-
         soundMeter = new SoundMeter();
         soundMeter.start();
 
@@ -127,14 +125,11 @@ public class SensorService extends Service implements OnTouchListener {
         BroadcastReceiver br = new ActivitySensor();
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
-        this.registerReceiver(br,filter);
-        activitySensor = (ActivitySensor)br;
-
+        this.registerReceiver(br, filter);
+        activitySensor = (ActivitySensor) br;
 
 
         timerHandler.postDelayed(timerRunnable, 0);
-
-
 
 
     }
@@ -143,8 +138,8 @@ public class SensorService extends Service implements OnTouchListener {
     @Override
     public void onDestroy() {
 
-        if(mWindowManager != null) {
-            if(touchLayout != null) mWindowManager.removeView(touchLayout);
+        if (mWindowManager != null) {
+            if (touchLayout != null) mWindowManager.removeView(touchLayout);
         }
 
         super.onDestroy();
@@ -182,22 +177,16 @@ public class SensorService extends Service implements OnTouchListener {
 
     private void checkCurrent() {
 
-        //determine if the foreground is an app or home screen
-        ActivityManager.RunningTaskInfo foregroundTaskInfo = am.getRunningTasks(1).get(0);
-        String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
 
-        if (foregroundTaskPackageName.equals("com.sec.android.app.launcher")){
-            currentActivity = foregroundTaskPackageName;
-        }else{
-            currentActivity = activitySensor.getCurrentActivity();
-        }
+        currentActivity = activitySensor.getCurrentActivity();
 
-        if(currentActivity.isEmpty()){
+
+        if (currentActivity.isEmpty()) {
             currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
 
         }
 
-        Log.d("testing:", "package name xxx: "+currentActivity);
+        Log.d("testing:", "package name xxx: " + currentActivity);
 
     }
 
@@ -251,7 +240,6 @@ public class SensorService extends Service implements OnTouchListener {
 
             outputFile(send);
             checkCurrent();
-
 
 
             timerHandler.postDelayed(this, 200);
