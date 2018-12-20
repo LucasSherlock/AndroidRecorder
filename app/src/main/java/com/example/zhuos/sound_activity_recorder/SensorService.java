@@ -29,7 +29,6 @@ import java.util.UUID;
 
 import android.widget.LinearLayout.LayoutParams;
 
-import de.robv.android.xposed.XposedHelpers;
 
 public class SensorService extends Service implements OnTouchListener {
 
@@ -40,10 +39,9 @@ public class SensorService extends Service implements OnTouchListener {
     private Accelerometer accelerometer;
     private Gyroscope gyroscope;
     private GravitySensor gravitySensor;
-    private BroadcastReceiver activitySensor;
+    private ActivitySensor activitySensor;
 
 
-    private ActivityHook activityHook;
 
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
@@ -51,7 +49,6 @@ public class SensorService extends Service implements OnTouchListener {
 
     ActivityManager am;
 
-    private String TAG = this.getClass().getSimpleName();
     private WindowManager mWindowManager;
     private LinearLayout touchLayout;
 
@@ -95,7 +92,6 @@ public class SensorService extends Service implements OnTouchListener {
         LayoutParams lp = new LayoutParams(1, LayoutParams.MATCH_PARENT);
         touchLayout.setLayoutParams(lp);
         touchLayout.setOnTouchListener(this);
-        Log.d("testing:", "service created2");
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
                 1, /* width */
@@ -106,14 +102,13 @@ public class SensorService extends Service implements OnTouchListener {
                         WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                 PixelFormat.TRANSPARENT);
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
-        Log.d("testing:", "service created3");
         mWindowManager.addView(touchLayout, mParams);
-        Log.d("testing:", "service created4");
-
 
 
         sound = 0;
         accX = accY = accZ = 0;
+        currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
+
 
 
         soundMeter = new SoundMeter();
@@ -128,12 +123,13 @@ public class SensorService extends Service implements OnTouchListener {
         gravitySensor = new GravitySensor(this);
         gravitySensor.mSensorManager.registerListener(gravitySensor, gravitySensor.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-//        activityHook = new ActivityHook();
 
-        activitySensor = new ActivitySensor();
+        BroadcastReceiver br = new ActivitySensor();
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
-        this.registerReceiver((BroadcastReceiver) activitySensor,filter);
+        this.registerReceiver(br,filter);
+        activitySensor = (ActivitySensor)br;
+
 
 
         timerHandler.postDelayed(timerRunnable, 0);
@@ -185,28 +181,23 @@ public class SensorService extends Service implements OnTouchListener {
     }
 
     private void checkCurrent() {
+
+        //determine if the foreground is an app or home screen
         ActivityManager.RunningTaskInfo foregroundTaskInfo = am.getRunningTasks(1).get(0);
         String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
+
         if (foregroundTaskPackageName.equals("com.sec.android.app.launcher")){
             currentActivity = foregroundTaskPackageName;
-
-        } else{
-            ActivitySensor a  = (ActivitySensor)activitySensor;
-            Log.d("testing:", "package name xxxxxxxxxxxxxxxxxx: "+a.getCurrentActivity());
-            //String s  = XposedHelpers.findField(ActivityHook.class,"currentName").toString();
-
-            //Object obj = XposedHelpers.getStaticObjectField(ActivityHook.class,"currentName");
-            //Class<?> clazz = XposedHelpers.findClass("ActivityHook",null);
-           // Log.d("testing:", "package name xxx: "+ s);
+        }else{
+            currentActivity = activitySensor.getCurrentActivity();
         }
-        Log.d("testing:", "package name xxx: "+foregroundTaskPackageName);
 
+        if(currentActivity.isEmpty()){
+            currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
 
-//        String packageName =  ProcessManager.getRunningForegroundApps(getApplicationContext()).get(0).getPackageName();
-//        Log.d("testing:","current app: " + currentApp);
+        }
 
-
-
+        Log.d("testing:", "package name xxx: "+currentActivity);
 
     }
 
