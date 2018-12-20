@@ -43,6 +43,13 @@
             android:name="xposedminversion"
             android:value="53" />
 
+
+        <receiver android:name=".ActivitySensor"  android:exported="true">
+            <intent-filter>
+                <action android:name="com.example.zhuos.sound_activity_recorder.ACTIVITY"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 

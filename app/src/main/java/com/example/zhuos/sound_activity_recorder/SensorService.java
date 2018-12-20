@@ -1,31 +1,22 @@
 package com.example.zhuos.sound_activity_recorder;
 
 import android.app.ActivityManager;
-import android.app.AndroidAppHelper;
-import android.app.Notification;
-import android.app.PendingIntent;
 import android.app.Service;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
 import android.hardware.SensorManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -34,17 +25,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import android.widget.LinearLayout.LayoutParams;
 
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
-import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 public class SensorService extends Service implements OnTouchListener {
 
@@ -55,9 +40,10 @@ public class SensorService extends Service implements OnTouchListener {
     private Accelerometer accelerometer;
     private Gyroscope gyroscope;
     private GravitySensor gravitySensor;
+    private BroadcastReceiver activitySensor;
 
 
-    private ActivitySensor activitySensor;
+    private ActivityHook activityHook;
 
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
@@ -72,6 +58,7 @@ public class SensorService extends Service implements OnTouchListener {
 
     private int sound;
     private float accX, accY, accZ,rotX,rotY,rotZ,graX,graY,graZ;
+    private String currentActivity;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -141,10 +128,17 @@ public class SensorService extends Service implements OnTouchListener {
         gravitySensor = new GravitySensor(this);
         gravitySensor.mSensorManager.registerListener(gravitySensor, gravitySensor.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
-        //activitySensor = new ActivitySensor();
+//        activityHook = new ActivityHook();
+
+        activitySensor = new ActivitySensor();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
+        this.registerReceiver((BroadcastReceiver) activitySensor,filter);
 
 
         timerHandler.postDelayed(timerRunnable, 0);
+
+
 
 
     }
@@ -194,13 +188,18 @@ public class SensorService extends Service implements OnTouchListener {
         ActivityManager.RunningTaskInfo foregroundTaskInfo = am.getRunningTasks(1).get(0);
         String foregroundTaskPackageName = foregroundTaskInfo.topActivity.getPackageName();
         if (foregroundTaskPackageName.equals("com.sec.android.app.launcher")){
-            Log.d("testing:", "package name xxx: "+foregroundTaskPackageName);
+            currentActivity = foregroundTaskPackageName;
+
         } else{
+            ActivitySensor a  = (ActivitySensor)activitySensor;
+            Log.d("testing:", "package name xxxxxxxxxxxxxxxxxx: "+a.getCurrentActivity());
+            //String s  = XposedHelpers.findField(ActivityHook.class,"currentName").toString();
 
-            String s  = XposedHelpers.findField(ActivitySensor.class,"currentName").toString();
-
-            Log.d("testing:", "package name xxx: "+ s);
+            //Object obj = XposedHelpers.getStaticObjectField(ActivityHook.class,"currentName");
+            //Class<?> clazz = XposedHelpers.findClass("ActivityHook",null);
+           // Log.d("testing:", "package name xxx: "+ s);
         }
+        Log.d("testing:", "package name xxx: "+foregroundTaskPackageName);
 
 
 //        String packageName =  ProcessManager.getRunningForegroundApps(getApplicationContext()).get(0).getPackageName();
