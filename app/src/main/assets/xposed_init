@@ -1,1 +1,2 @@
-com.example.zhuos.sound_activity_recorder.ActivityHook
+com.example.zhuos.sound_activity_recorder.ActivityHooker
+com.example.zhuos.sound_activity_recorder.TouchHooker

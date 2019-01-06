@@ -17,7 +17,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 import static android.support.v4.content.ContextCompat.startActivity;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
-public class ActivityHook implements IXposedHookLoadPackage {
+public class ActivityHooker implements IXposedHookLoadPackage {
 
     Activity mCurrentActivity;
 
