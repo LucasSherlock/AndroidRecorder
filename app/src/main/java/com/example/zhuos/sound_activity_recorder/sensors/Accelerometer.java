@@ -1,10 +1,12 @@
-package com.example.zhuos.sound_activity_recorder;
+package com.example.zhuos.sound_activity_recorder.sensors;
 
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.hardware.SensorEventListener;
+
+import com.example.zhuos.sound_activity_recorder.HelperTool;
 
 public class Accelerometer implements SensorEventListener {
 

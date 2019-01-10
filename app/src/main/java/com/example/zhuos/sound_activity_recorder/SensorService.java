@@ -1,10 +1,12 @@
 package com.example.zhuos.sound_activity_recorder;
 
 import android.app.ActivityManager;
+import android.app.KeyguardManager;
 import android.app.Service;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.PixelFormat;
@@ -12,6 +14,7 @@ import android.hardware.SensorManager;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -28,6 +31,11 @@ import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
 import android.widget.LinearLayout.LayoutParams;
+
+import com.example.zhuos.sound_activity_recorder.sensors.Accelerometer;
+import com.example.zhuos.sound_activity_recorder.sensors.GravitySensor;
+import com.example.zhuos.sound_activity_recorder.sensors.Gyroscope;
+import com.example.zhuos.sound_activity_recorder.sensors.SoundMeter;
 
 
 public class SensorService extends Service implements OnTouchListener {
@@ -188,6 +196,32 @@ public class SensorService extends Service implements OnTouchListener {
 
         Log.d("testing:", "package name xxx: " + currentActivity);
 
+
+    }
+
+
+    private void checkPhoneState(){
+        boolean isScreenOn;
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
+            isScreenOn = pm.isInteractive();
+        } else{
+            isScreenOn = pm.isScreenOn();
+        }
+        if(isScreenOn){
+            if( km.inKeyguardRestrictedInputMode() ) {
+                // it is locked
+                Log.d("testings:", "screen: locked");
+            } else {
+                //it is not locked
+                Log.d("testings:", "screen: not locked");
+            }
+        }else {
+            Log.d("testings:", "screen: off");
+        }
+
     }
 
     private void outputFile(String content) {
@@ -240,6 +274,7 @@ public class SensorService extends Service implements OnTouchListener {
 
             outputFile(send);
             checkCurrent();
+            checkPhoneState();
 
 
             timerHandler.postDelayed(this, 200);

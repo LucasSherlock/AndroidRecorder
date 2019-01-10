@@ -1,4 +1,4 @@
-package com.example.zhuos.sound_activity_recorder;
+package com.example.zhuos.sound_activity_recorder.sensors;
 
 import java.io.IOException;
 import android.media.MediaRecorder;
