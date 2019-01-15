@@ -1,6 +1,9 @@
 package com.example.zhuos.sound_activity_recorder;
 
 import android.app.Activity;
+import android.app.AndroidAppHelper;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
@@ -17,12 +20,12 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
-public class TouchHooker implements IXposedHookLoadPackage {
+public class GestureHooker implements IXposedHookLoadPackage {
 
     //private TouchEventHandler mTouchHandler = new TouchEventHanlder();
-    private final GestureListener gestureListener = new GestureListener();
-    private GestureDetectorCompat mDetector;
+//    private GestureDetectorCompat mDetector;
     private Gesture gesture;
+    private final int REFRESH_TIME = 100;
     private final int MOVE_MIN_THRESHOLD = 80;
     private final int MOVE_HMAX_THRESHOLD = 330;
     private final int MOVE_VMAX_THRESHOLD = 230;
@@ -107,7 +110,7 @@ public class TouchHooker implements IXposedHookLoadPackage {
 
             case MotionEvent.ACTION_MOVE:
 
-                if (currentTime - gesture.getCurrentTime() > 100) {
+                if (currentTime - gesture.getCurrentTime() > REFRESH_TIME) {
                     if ((event.getRawX() - gesture.getCurrentX() > 10) ||
                             (event.getRawX() - gesture.getCurrentX() < -10) ||
                             (event.getRawY() - gesture.getCurrentY() > 10) ||
@@ -209,7 +212,7 @@ public class TouchHooker implements IXposedHookLoadPackage {
                 gesture.setCurrentY(event.getRawY());
                 Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
 
-
+                sendIntent(gesture);
                 break;
             case MotionEvent.ACTION_CANCEL:
                 return "Cancel";
@@ -217,6 +220,15 @@ public class TouchHooker implements IXposedHookLoadPackage {
         }
 
         return "";
+    }
+
+    private void sendIntent(Gesture gesture) {
+        Intent intent = new Intent();
+        intent.setAction("com.example.zhuos.sound_activity_recorder.GESTURE");
+        intent.putExtra("gesture", gesture);
+
+        Context context = (Context) AndroidAppHelper.currentApplication();
+        context.sendBroadcast(intent);
     }
 
 

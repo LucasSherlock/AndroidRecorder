@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public class ActivitySensor extends BroadcastReceiver {
+public class ActivityReceiver extends BroadcastReceiver {
 
     String currentActivity;
 
-    public ActivitySensor(){
+    public ActivityReceiver(){
         currentActivity = "";
     }
 

@@ -38,7 +38,7 @@ import com.example.zhuos.sound_activity_recorder.sensors.Gyroscope;
 import com.example.zhuos.sound_activity_recorder.sensors.SoundMeter;
 
 
-public class SensorService extends Service implements OnTouchListener {
+public class SensorService extends Service {
 
 
     private final IBinder mBinder = new LocalBinder();
@@ -47,7 +47,8 @@ public class SensorService extends Service implements OnTouchListener {
     private Accelerometer accelerometer;
     private Gyroscope gyroscope;
     private GravitySensor gravitySensor;
-    private ActivitySensor activitySensor;
+    private ActivityReceiver activityReceiver;
+    private GestureReceiver gestureReceiver;
 
 
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
@@ -69,11 +70,6 @@ public class SensorService extends Service implements OnTouchListener {
         return mBinder;
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        Log.d("testing:", event.getX() + " " + event.getY());
-        return false;
-    }
 
 
     public class LocalBinder extends Binder {
@@ -94,22 +90,22 @@ public class SensorService extends Service implements OnTouchListener {
 
         Log.d("testing:", "service created");
 
-
-        touchLayout = new LinearLayout(this);
-        LayoutParams lp = new LayoutParams(1, LayoutParams.MATCH_PARENT);
-        touchLayout.setLayoutParams(lp);
-        touchLayout.setOnTouchListener(this);
-        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
-                1, /* width */
-                1, /* height */
-                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
-                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
-                PixelFormat.TRANSPARENT);
-        mParams.gravity = Gravity.LEFT | Gravity.TOP;
-        mWindowManager.addView(touchLayout, mParams);
+//
+//        touchLayout = new LinearLayout(this);
+//        LayoutParams lp = new LayoutParams(1, LayoutParams.MATCH_PARENT);
+//        touchLayout.setLayoutParams(lp);
+//        touchLayout.setOnTouchListener(this);
+//        mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+//        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
+//                1, /* width */
+//                1, /* height */
+//                WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+//                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL |
+//                        WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+//                PixelFormat.TRANSPARENT);
+//        mParams.gravity = Gravity.LEFT | Gravity.TOP;
+//        mWindowManager.addView(touchLayout, mParams);
 
 
         sound = 0;
@@ -130,11 +126,17 @@ public class SensorService extends Service implements OnTouchListener {
         gravitySensor.mSensorManager.registerListener(gravitySensor, gravitySensor.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
-        BroadcastReceiver br = new ActivitySensor();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
-        this.registerReceiver(br, filter);
-        activitySensor = (ActivitySensor) br;
+        BroadcastReceiver brActivity = new ActivityReceiver();
+        IntentFilter filterA = new IntentFilter();
+        filterA.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
+        this.registerReceiver(brActivity, filterA);
+        activityReceiver = (ActivityReceiver) brActivity;
+
+        BroadcastReceiver brGesture = new GestureReceiver();
+        IntentFilter filterG = new IntentFilter();
+        filterG.addAction("com.example.zhuos.sound_activity_recorder.GESTURE");
+        this.registerReceiver(brGesture, filterG);
+        gestureReceiver = (GestureReceiver) brGesture;
 
 
         timerHandler.postDelayed(timerRunnable, 0);
@@ -185,18 +187,11 @@ public class SensorService extends Service implements OnTouchListener {
 
     private void checkCurrent() {
 
-
-        currentActivity = activitySensor.getCurrentActivity();
-
-
+        currentActivity = activityReceiver.getCurrentActivity();
         if (currentActivity.isEmpty()) {
             currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
-
         }
-
         Log.d("testing:", "package name xxx: " + currentActivity);
-
-
     }
 
 
@@ -269,7 +264,7 @@ public class SensorService extends Service implements OnTouchListener {
 
             String send = sound + "," +
                     String.format("%.2f", accelerometer.getX()) + "," +
-                    String.format("%.2f", accelerometer.getY()) + "." +
+                    String.format("%.2f", accelerometer.getY()) + "," +
                     String.format("%.2f", accelerometer.getZ());
 
             outputFile(send);
