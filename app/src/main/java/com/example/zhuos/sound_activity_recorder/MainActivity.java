@@ -3,11 +3,13 @@ package com.example.zhuos.sound_activity_recorder;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
@@ -159,21 +161,42 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
             @Override
             public void onClick(View v) {
-                Button b = (Button) v;
+                final Button b = (Button) v;
 
                 BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
                 //BluetoothDevice device = adapter.getRemoteDevice("14:ab:c5:7a:b5:12");
 
 
-                Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
-
+                final Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
                 List<String> s = new ArrayList<String>();
+                for (BluetoothDevice bt : pairedDevices) {
+                    s.add(bt.getName());
+                }
+                final CharSequence[] cs = s.toArray(new CharSequence[s.size()]);
+                final AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Device");
+                builder.setItems(cs, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        for(BluetoothDevice b : pairedDevices){
+                            if (b.getName().equals((String) cs[which])){
+                                service.connectToBluetooth(b);
+                            }
+                        }
+                    }
+                });
+                builder.show();
+
+
+
+
+                //List<String> s = new ArrayList<String>();
                 for (BluetoothDevice bt : pairedDevices) {
                     s.add(bt.getName());
                     Log.d("testing:", bt.getName());
                     if (bt.getName().equals("DESKTOP-3IKI16L")) {
 
-                        service.connectToBluetooth(bt);
+                       // service.connectToBluetooth(bt);
 
 //                        try {
 //                            socket = bt.createRfcommSocketToServiceRecord(uuid);
