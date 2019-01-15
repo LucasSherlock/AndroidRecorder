@@ -22,16 +22,17 @@ public class TouchHooker implements IXposedHookLoadPackage {
     //private TouchEventHandler mTouchHandler = new TouchEventHanlder();
     private final GestureListener gestureListener = new GestureListener();
     private GestureDetectorCompat mDetector;
-    private HashMap<Integer, FingerTouch> touchTimeMap;
+    private Gesture gesture;
+    private final int MOVE_MIN_THRESHOLD = 80;
+    private final int MOVE_HMAX_THRESHOLD = 330;
+    private final int MOVE_VMAX_THRESHOLD = 230;
 
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
 
         //mDetector = new GestureDetectorCompat(lpparam,this);
-        touchTimeMap = new HashMap<>();
         //findAndHookMethod(Activity.class, "onTouchEvent", MotionEvent.class, new ActivityTouchEvent());
         findAndHookMethod(View.class, "dispatchTouchEvent", MotionEvent.class, new ViewTouchEvent(lpparam.packageName));
-
 
 
     }
@@ -84,114 +85,138 @@ public class TouchHooker implements IXposedHookLoadPackage {
 
 
             if ((Boolean) param.getResult() || view.getParent() == null || (viewRootImplClass.isInstance(view.getParent()))) {
-               // Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + actionToString(event.getActionMasked()) + event.getActionIndex());
+                // Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + actionToString(event.getActionMasked()) + event.getActionIndex());
                 // mDetector.onTouchEvent(event);
                 //motionEventToString(event);
-                Log.d("testings:",motionEventToString(event));
+                Log.d("testings:", motionEventToString(event));
             }
         }
     }
 
 
     public String motionEventToString(MotionEvent event) {
-        int fingerID = event.getActionIndex();
         long currentTime = System.currentTimeMillis();
-        FingerTouch previous;
 
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
 
-                    FingerTouch touch = new FingerTouch(fingerID, currentTime, event.getRawX(), event.getRawY(),MotionEvent.ACTION_DOWN);
-
-                if (touch != null) {
-                    touchTimeMap.put(fingerID, touch);
-                }
+                gesture = new Gesture(currentTime, currentTime, event.getRawX(), event.getRawY(), event.getRawX(), event.getRawY(), GestureType.Start);
+                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
 
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                previous = touchTimeMap.get(fingerID);
-                //if (currentTime - previous.getTime() > 100) {
-                    if ((event.getRawX() - previous.getX() > 10) ||
-                            (event.getRawX() - previous.getX() < -10) ||
-                            (event.getRawY() - previous.getY() > 10) ||
-                            (event.getRawY() - previous.getY() < -10)) {
-                        FingerTouch touch1 = new FingerTouch(fingerID,currentTime,event.getRawX(),event.getRawY(),MotionEvent.ACTION_MOVE);
-                        touchTimeMap.put(fingerID,touch1);
-                        Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: move " + event.getActionIndex());
+
+                if (currentTime - gesture.getCurrentTime() > 100) {
+                    if ((event.getRawX() - gesture.getCurrentX() > 10) ||
+                            (event.getRawX() - gesture.getCurrentX() < -10) ||
+                            (event.getRawY() - gesture.getCurrentY() > 10) ||
+                            (event.getRawY() - gesture.getCurrentY() < -10)) {
+                        Log.d("testings:", "touch event move1");
+                        switch (gesture.getType()) {
+                            case Start:
+                                if (gesture.getStartX() - event.getRawX() > MOVE_MIN_THRESHOLD) {//swipe left
+                                    gesture.setType(GestureType.MoveLeft);
+                                } else if (gesture.getStartX() - event.getRawX() < -MOVE_MIN_THRESHOLD) {//swipe right
+                                    gesture.setType(GestureType.MoveRight);
+                                } else if (gesture.getStartY() - event.getRawY() > MOVE_MIN_THRESHOLD) {//swipe up
+                                    gesture.setType(GestureType.MoveUp);
+                                } else if (gesture.getStartY() - event.getRawY() < -MOVE_MIN_THRESHOLD) {//swipe down
+                                    gesture.setType(GestureType.MoveDown);
+                                } else {
+                                    gesture.setType(GestureType.Move);
+                                }
+                                break;
+
+                            case MoveUp:
+                                if (gesture.getStartX() - event.getRawX() > MOVE_HMAX_THRESHOLD ||//too much to the left
+                                        gesture.getStartX() - event.getRawX() < -MOVE_HMAX_THRESHOLD ||//to the right
+                                        gesture.getStartY() - event.getRawY() < -MOVE_MIN_THRESHOLD) {//moving down
+                                    gesture.setType(GestureType.Move);
+                                }
+                                break;
+
+                            case MoveDown:
+                                if (gesture.getStartX() - event.getRawX() > MOVE_HMAX_THRESHOLD ||//too much to the left
+                                        gesture.getStartX() - event.getRawX() < -MOVE_HMAX_THRESHOLD ||//to the right
+                                        gesture.getStartY() - event.getRawY() > MOVE_MIN_THRESHOLD) {//moving up
+                                    gesture.setType(GestureType.Move);
+                                }
+                                break;
+
+                            case MoveLeft:
+                                if (gesture.getStartY() - event.getRawY() > MOVE_VMAX_THRESHOLD ||//too much up
+                                        gesture.getStartY() - event.getRawY() < -MOVE_VMAX_THRESHOLD ||//down
+                                        gesture.getStartX() - event.getRawX() < -MOVE_MIN_THRESHOLD) {//right
+                                    gesture.setType(GestureType.Move);
+                                }
+                                break;
+
+                            case MoveRight:
+                                if (gesture.getStartY() - event.getRawY() > MOVE_VMAX_THRESHOLD ||//too much up
+                                        gesture.getStartY() - event.getRawY() < -MOVE_VMAX_THRESHOLD ||//down
+                                        gesture.getStartX() - event.getRawX() > MOVE_MIN_THRESHOLD) {//left
+                                    gesture.setType(GestureType.Move);
+                                }
+                                break;
+
+                        }
 
                     }
-               // }
 
-                if (event.getPointerCount()>1){
-                    Log.d("testings:", "touch event " + event.getX(1) + "  " + event.getY(1) + " action: pointer " + event.getActionIndex());
-
+                    Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+                    gesture.setCurrentTime(currentTime);
+                    gesture.setCurrentX(event.getRawX());
+                    gesture.setCurrentY(event.getRawY());
                 }
+
+                Log.d("testings:", "touch event3 " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
-                touchTimeMap.remove(fingerID);
-                return "Pointer Down" + fingerID;
+                if (event.getPointerCount() == 2) {
+                    gesture.setType(GestureType.TwoFingers);
+                } else if (event.getPointerCount() > 2) {
+                    gesture.setType(GestureType.MultiFingers);
+                }
+                gesture.setCurrentTime(currentTime);
+                gesture.setCurrentX(event.getRawX());
+                gesture.setCurrentY(event.getRawY());
+                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+
+                return "";
 
             case MotionEvent.ACTION_POINTER_UP:
-                FingerTouch touch1 = new FingerTouch(fingerID,currentTime,event.getX(fingerID),event.getY(fingerID),MotionEvent.ACTION_MOVE);
-                touchTimeMap.put(fingerID,touch1);
-                return "Pointer Up" + fingerID;
+                gesture.setCurrentTime(currentTime);
+                gesture.setCurrentX(event.getRawX());
+                gesture.setCurrentY(event.getRawY());
+                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+                return "";
             case MotionEvent.ACTION_OUTSIDE:
                 return "Outside";
             case MotionEvent.ACTION_UP:
-                previous = touchTimeMap.get(fingerID);
-                if (previous.getType() == MotionEvent.ACTION_MOVE){
-                    Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: move end " + event.getActionIndex());
-                } else {
-                    if (currentTime - touchTimeMap.get(fingerID).getTime() < 500) {
-                        Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: tap " + event.getActionIndex());
-                    } else {
-                        Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: long press " + event.getActionIndex());
 
+                if (gesture.getType() == GestureType.Start) {
+                    if (currentTime - gesture.getStartTime() > 500) {
+                        gesture.setType(GestureType.LongPress);
+                    } else {
+                        gesture.setType(GestureType.Tap);
                     }
                 }
+
+                gesture.setCurrentTime(currentTime);
+                gesture.setCurrentX(event.getRawX());
+                gesture.setCurrentY(event.getRawY());
+                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+
+
                 break;
             case MotionEvent.ACTION_CANCEL:
                 return "Cancel";
 
         }
+
         return "";
-    }
-
-
-    private class FingerTouch {
-        private int ID, type;
-        private long time;
-        private float x, y;
-
-        public FingerTouch(int ID, long time, float x, float y,int type) {
-            this.ID = ID;
-            this.time = time;
-            this.x = x;
-            this.y = y;
-            this.type = type;
-        }
-
-        public int getID() {
-            return ID;
-        }
-
-        public long getTime() {
-            return time;
-        }
-
-        public float getX() {
-            return x;
-        }
-
-        public float getY() {
-            return y;
-        }
-
-        public int getType() {
-            return type;
-        }
     }
 
 
