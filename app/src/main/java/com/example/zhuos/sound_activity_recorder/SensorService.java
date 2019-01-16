@@ -28,6 +28,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import android.widget.LinearLayout.LayoutParams;
@@ -260,12 +262,21 @@ public class SensorService extends Service {
             graY = gravitySensor.getY();
             graZ = gravitySensor.getZ();
 
+            List<String> outputList = new ArrayList<>();
+            outputList.add(Integer.toString(sound));
+            outputList.add(Float.toString(accX));
+            outputList.add(Float.toString(accY));
+            outputList.add(Float.toString(accZ));
+            outputList.add(Float.toString(rotX));
+            outputList.add(Float.toString(rotY));
+            outputList.add(Float.toString(rotZ));
+            outputList.add(Float.toString(graX));
+            outputList.add(Float.toString(graY));
+            outputList.add(Float.toString(graZ));
+
             Log.d("output:", "getting data " + sound);
 
-            String send = sound + "," +
-                    String.format("%.2f", accelerometer.getX()) + "," +
-                    String.format("%.2f", accelerometer.getY()) + "," +
-                    String.format("%.2f", accelerometer.getZ());
+            String send = android.text.TextUtils.join(",",outputList);
 
             outputFile(send);
             checkCurrent();
