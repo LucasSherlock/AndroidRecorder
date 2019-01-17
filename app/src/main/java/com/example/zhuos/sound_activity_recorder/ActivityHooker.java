@@ -19,9 +19,6 @@ import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 public class ActivityHooker implements IXposedHookLoadPackage {
 
-    Activity mCurrentActivity;
-
-
     @Override
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
 
@@ -33,7 +30,7 @@ public class ActivityHooker implements IXposedHookLoadPackage {
             @Override
             protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
-                mCurrentActivity = (Activity) param.args[0];
+                Activity mCurrentActivity = (Activity) param.args[0];
 
 
 

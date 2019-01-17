@@ -3,23 +3,22 @@ package com.example.zhuos.sound_activity_recorder;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Service;
+import android.app.usage.NetworkStats;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.PixelFormat;
 import android.hardware.SensorManager;
+import android.net.TrafficStats;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -31,8 +30,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import android.widget.LinearLayout.LayoutParams;
 
 import com.example.zhuos.sound_activity_recorder.sensors.Accelerometer;
 import com.example.zhuos.sound_activity_recorder.sensors.GravitySensor;
@@ -53,6 +50,12 @@ public class SensorService extends Service {
     private GestureReceiver gestureReceiver;
 
 
+
+    private long mStartRX;
+    private long mStartTX;
+
+
+
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
     OutputStream outputStream;
@@ -66,6 +69,9 @@ public class SensorService extends Service {
     private int sound;
     private float accX, accY, accZ, rotX, rotY, rotZ, graX, graY, graZ;
     private String currentActivity;
+
+
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -81,6 +87,7 @@ public class SensorService extends Service {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onCreate() {
         super.onCreate();
@@ -128,13 +135,18 @@ public class SensorService extends Service {
         gravitySensor.mSensorManager.registerListener(gravitySensor, gravitySensor.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
-        BroadcastReceiver brActivity = new ActivityReceiver();
+
+        mStartRX = TrafficStats.getTotalRxBytes();
+        mStartTX = TrafficStats.getTotalTxBytes();
+
+
+        BroadcastReceiver brActivity = new ActivityReceiver(this);
         IntentFilter filterA = new IntentFilter();
         filterA.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
         this.registerReceiver(brActivity, filterA);
         activityReceiver = (ActivityReceiver) brActivity;
 
-        BroadcastReceiver brGesture = new GestureReceiver();
+        BroadcastReceiver brGesture = new GestureReceiver(this);
         IntentFilter filterG = new IntentFilter();
         filterG.addAction("com.example.zhuos.sound_activity_recorder.GESTURE");
         this.registerReceiver(brGesture, filterG);
@@ -187,13 +199,15 @@ public class SensorService extends Service {
 
     }
 
-    private void checkCurrent() {
 
-        currentActivity = activityReceiver.getCurrentActivity();
-        if (currentActivity.isEmpty()) {
-            currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
-        }
-        Log.d("testing:", "package name xxx: " + currentActivity);
+
+    private void networkUsage(){
+        long rxBytes = TrafficStats.getTotalRxBytes()- mStartRX;
+        long txBytes = TrafficStats.getTotalTxBytes()- mStartTX;
+
+        Log.d("testings:",  "network usage:   " +  rxBytes+ "    " +txBytes);
+        mStartRX = TrafficStats.getTotalRxBytes();
+        mStartTX = TrafficStats.getTotalTxBytes();
     }
 
 
@@ -221,7 +235,7 @@ public class SensorService extends Service {
 
     }
 
-    private void outputFile(String content) {
+    public void outputFile(String content) {
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
@@ -248,6 +262,7 @@ public class SensorService extends Service {
     Handler timerHandler = new Handler();
     Runnable timerRunnable = new Runnable() {
 
+        @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void run() {
 
@@ -273,14 +288,19 @@ public class SensorService extends Service {
             outputList.add(Float.toString(graX));
             outputList.add(Float.toString(graY));
             outputList.add(Float.toString(graZ));
+            outputList.add(currentActivity);
+            outputList.add(Integer.toString(-1));
 
-            Log.d("output:", "getting data " + sound);
 
             String send = android.text.TextUtils.join(",",outputList);
 
             outputFile(send);
-            checkCurrent();
-            checkPhoneState();
+            //checkCurrent();
+            //checkPhoneState();
+//            networkSensor.getData();
+            //Log.d("testings:", bucket.getRxBytes() + "    " +bucket.getTxBytes());
+
+            networkUsage();
 
 
             timerHandler.postDelayed(this, 200);
@@ -325,5 +345,9 @@ public class SensorService extends Service {
 
     public float getGraZ() {
         return graZ;
+    }
+
+    public void setCurrentActivity(String currentActivity) {
+        this.currentActivity = currentActivity;
     }
 }

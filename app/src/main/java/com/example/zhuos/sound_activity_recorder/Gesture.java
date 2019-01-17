@@ -2,8 +2,10 @@ package com.example.zhuos.sound_activity_recorder;
 
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Gesture implements Serializable {
+public class    Gesture implements Serializable {
 
     private long startTime,currentTime;
     private float startX,startY,currentX,currentY;
@@ -62,6 +64,23 @@ public class Gesture implements Serializable {
 
     public void setType(GestureType type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        List<String> stringList = new ArrayList<>();
+        stringList.add(Long.toString(startTime));
+        stringList.add(Float.toString(startX));
+        stringList.add(Float.toString(startY));
+        stringList.add(Long.toString(currentTime));
+        stringList.add(Float.toString(currentX));
+        stringList.add(Float.toString(currentY));
+        stringList.add(type.toString());
+
+        String send = android.text.TextUtils.join(",",stringList);
+
+
+        return send;
     }
 }
 

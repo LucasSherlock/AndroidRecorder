@@ -7,10 +7,16 @@ import android.content.Intent;
 public class GestureReceiver extends BroadcastReceiver {
 
     Gesture currentGesture;
+    SensorService sensorService;
+
+    public GestureReceiver(SensorService service){
+        this.sensorService = service;
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         currentGesture = (Gesture) intent.getSerializableExtra("gesture");
+        sensorService.outputFile(currentGesture.toString());
     }
 
     public Gesture getCurrentGesture() {

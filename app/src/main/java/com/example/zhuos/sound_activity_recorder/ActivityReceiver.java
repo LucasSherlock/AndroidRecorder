@@ -8,18 +8,19 @@ import android.util.Log;
 public class ActivityReceiver extends BroadcastReceiver {
 
     String currentActivity;
+    SensorService sensorService;
 
-    public ActivityReceiver(){
+    public ActivityReceiver(SensorService service) {
         currentActivity = "";
+        this.sensorService = service;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-         currentActivity = intent.getStringExtra("currentActivity");
-        Log.d("testing:","from activity sensor:  "+currentActivity);
+        currentActivity = intent.getStringExtra("currentActivity");
+        sensorService.setCurrentActivity(currentActivity);
+
+        //Log.d("testing:","from activity sensor:  "+currentActivity);
     }
 
-    public String getCurrentActivity() {
-        return currentActivity;
-    }
 }
