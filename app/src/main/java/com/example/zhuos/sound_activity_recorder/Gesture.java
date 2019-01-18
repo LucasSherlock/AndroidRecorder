@@ -2,7 +2,10 @@ package com.example.zhuos.sound_activity_recorder;
 
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class    Gesture implements Serializable {
@@ -69,10 +72,18 @@ public class    Gesture implements Serializable {
     @Override
     public String toString() {
         List<String> stringList = new ArrayList<>();
-        stringList.add(Long.toString(startTime));
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy hh:mm:ss.SSS");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(startTime);
+        String start = sdf.format(calendar.getTime());
+        calendar.setTimeInMillis(currentTime);
+        String current = sdf.format(calendar.getTime());
+
+        stringList.add(start);
         stringList.add(Float.toString(startX));
         stringList.add(Float.toString(startY));
-        stringList.add(Long.toString(currentTime));
+        stringList.add(current);
         stringList.add(Float.toString(currentX));
         stringList.add(Float.toString(currentY));
         stringList.add(type.toString());

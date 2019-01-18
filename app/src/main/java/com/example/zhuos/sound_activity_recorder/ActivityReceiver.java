@@ -10,17 +10,22 @@ public class ActivityReceiver extends BroadcastReceiver {
     String currentActivity;
     SensorService sensorService;
 
-    public ActivityReceiver(SensorService service) {
+    public ActivityReceiver() {
         currentActivity = "";
-        this.sensorService = service;
+        //this.sensorService = service;
     }
 
     @Override
     public void onReceive(Context context, Intent intent) {
         currentActivity = intent.getStringExtra("currentActivity");
-        sensorService.setCurrentActivity(currentActivity);
-
+        if (sensorService != null) {
+            sensorService.setCurrentActivity(currentActivity);
+        }
         //Log.d("testing:","from activity sensor:  "+currentActivity);
+    }
+
+    public void setService(SensorService service){
+        this.sensorService = service;
     }
 
 }

@@ -50,12 +50,6 @@ public class SensorService extends Service {
     private GestureReceiver gestureReceiver;
 
 
-
-    private long mStartRX;
-    private long mStartTX;
-
-
-
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
     OutputStream outputStream;
@@ -69,15 +63,14 @@ public class SensorService extends Service {
     private int sound;
     private float accX, accY, accZ, rotX, rotY, rotZ, graX, graY, graZ;
     private String currentActivity;
-
-
+    private long totalRX, totalTX, rxBytes, txBytes;
+    private String screenStatus;
 
 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
     }
-
 
 
     public class LocalBinder extends Binder {
@@ -135,22 +128,23 @@ public class SensorService extends Service {
         gravitySensor.mSensorManager.registerListener(gravitySensor, gravitySensor.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
 
+        totalRX = TrafficStats.getTotalRxBytes();
+        totalTX = TrafficStats.getTotalTxBytes();
 
-        mStartRX = TrafficStats.getTotalRxBytes();
-        mStartTX = TrafficStats.getTotalTxBytes();
 
-
-        BroadcastReceiver brActivity = new ActivityReceiver(this);
+        BroadcastReceiver brActivity = new ActivityReceiver();
         IntentFilter filterA = new IntentFilter();
         filterA.addAction("com.example.zhuos.sound_activity_recorder.ACTIVITY");
         this.registerReceiver(brActivity, filterA);
         activityReceiver = (ActivityReceiver) brActivity;
+        activityReceiver.setService(this);
 
-        BroadcastReceiver brGesture = new GestureReceiver(this);
+        BroadcastReceiver brGesture = new GestureReceiver();
         IntentFilter filterG = new IntentFilter();
         filterG.addAction("com.example.zhuos.sound_activity_recorder.GESTURE");
         this.registerReceiver(brGesture, filterG);
         gestureReceiver = (GestureReceiver) brGesture;
+        gestureReceiver.setService(this);
 
 
         timerHandler.postDelayed(timerRunnable, 0);
@@ -200,37 +194,39 @@ public class SensorService extends Service {
     }
 
 
+    private void networkUsage() {
+        rxBytes = TrafficStats.getTotalRxBytes() - totalRX;
+        txBytes = TrafficStats.getTotalTxBytes() - totalTX;
 
-    private void networkUsage(){
-        long rxBytes = TrafficStats.getTotalRxBytes()- mStartRX;
-        long txBytes = TrafficStats.getTotalTxBytes()- mStartTX;
-
-        Log.d("testings:",  "network usage:   " +  rxBytes+ "    " +txBytes);
-        mStartRX = TrafficStats.getTotalRxBytes();
-        mStartTX = TrafficStats.getTotalTxBytes();
+        //Log.d("testings:",  "network usage:   " +  rxBytes+ "    " +txBytes);
+        totalRX = TrafficStats.getTotalRxBytes();
+        totalTX = TrafficStats.getTotalTxBytes();
     }
 
 
-    private void checkPhoneState(){
+    private void checkPhoneState() {
         boolean isScreenOn;
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT_WATCH) {
             isScreenOn = pm.isInteractive();
-        } else{
+        } else {
             isScreenOn = pm.isScreenOn();
         }
-        if(isScreenOn){
-            if( km.inKeyguardRestrictedInputMode() ) {
+        if (isScreenOn) {
+            if (km.inKeyguardRestrictedInputMode()) {
                 // it is locked
-                Log.d("testings:", "screen: locked");
+                screenStatus = "locked";
+                //Log.d("testings:", "screen: locked");
             } else {
                 //it is not locked
-                Log.d("testings:", "screen: not locked");
+                screenStatus = "unlocked";
+                // Log.d("testings:", "screen: not locked");
             }
-        }else {
-            Log.d("testings:", "screen: off");
+        } else {
+            screenStatus = "off";
+            // Log.d("testings:", "screen: off");
         }
 
     }
@@ -276,6 +272,8 @@ public class SensorService extends Service {
             graX = gravitySensor.getX();
             graY = gravitySensor.getY();
             graZ = gravitySensor.getZ();
+            networkUsage();
+            checkPhoneState();
 
             List<String> outputList = new ArrayList<>();
             outputList.add(Integer.toString(sound));
@@ -289,18 +287,16 @@ public class SensorService extends Service {
             outputList.add(Float.toString(graY));
             outputList.add(Float.toString(graZ));
             outputList.add(currentActivity);
-            outputList.add(Integer.toString(-1));
+            outputList.add(screenStatus);
+            outputList.add(Long.toString(rxBytes));
+            outputList.add(Long.toString(txBytes));
 
 
-            String send = android.text.TextUtils.join(",",outputList);
+            String send = android.text.TextUtils.join(",", outputList);
 
             outputFile(send);
             //checkCurrent();
-            //checkPhoneState();
-//            networkSensor.getData();
-            //Log.d("testings:", bucket.getRxBytes() + "    " +bucket.getTxBytes());
-
-            networkUsage();
+            //
 
 
             timerHandler.postDelayed(this, 200);

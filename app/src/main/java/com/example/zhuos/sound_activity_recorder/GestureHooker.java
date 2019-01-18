@@ -11,6 +11,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Timer;
 
@@ -104,7 +105,6 @@ public class GestureHooker implements IXposedHookLoadPackage {
             case MotionEvent.ACTION_DOWN:
 
                 gesture = new Gesture(currentTime, currentTime, event.getRawX(), event.getRawY(), event.getRawX(), event.getRawY(), GestureType.Start);
-                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
 
                 break;
 
@@ -115,7 +115,6 @@ public class GestureHooker implements IXposedHookLoadPackage {
                             (event.getRawX() - gesture.getCurrentX() < -10) ||
                             (event.getRawY() - gesture.getCurrentY() > 10) ||
                             (event.getRawY() - gesture.getCurrentY() < -10)) {
-                        Log.d("testings:", "touch event move1");
                         switch (gesture.getType()) {
                             case Start:
                                 if (gesture.getStartX() - event.getRawX() > MOVE_MIN_THRESHOLD) {//swipe left
@@ -167,13 +166,13 @@ public class GestureHooker implements IXposedHookLoadPackage {
 
                     }
 
-                    Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+              //      Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
                     gesture.setCurrentTime(currentTime);
                     gesture.setCurrentX(event.getRawX());
                     gesture.setCurrentY(event.getRawY());
                 }
 
-                Log.d("testings:", "touch event3 " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+             //  Log.d("testings:", "touch event3 " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -185,7 +184,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                 gesture.setCurrentTime(currentTime);
                 gesture.setCurrentX(event.getRawX());
                 gesture.setCurrentY(event.getRawY());
-                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+              //  Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
 
                 return "";
 
@@ -193,7 +192,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                 gesture.setCurrentTime(currentTime);
                 gesture.setCurrentX(event.getRawX());
                 gesture.setCurrentY(event.getRawY());
-                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+                //Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
                 return "";
             case MotionEvent.ACTION_OUTSIDE:
                 return "Outside";
@@ -210,7 +209,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                 gesture.setCurrentTime(currentTime);
                 gesture.setCurrentX(event.getRawX());
                 gesture.setCurrentY(event.getRawY());
-                Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
+                //Log.d("testings:", "touch event " + event.getRawX() + "  " + event.getRawY() + " action: " + gesture.getType());
 
                 sendIntent(gesture);
                 break;
