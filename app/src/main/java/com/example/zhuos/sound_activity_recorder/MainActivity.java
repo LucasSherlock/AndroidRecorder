@@ -97,6 +97,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
 
+        serviceIntent = new Intent(getApplicationContext(), SensorService.class);
+        getApplicationContext().startService(serviceIntent);
+        timerHandler.postDelayed(timerRunnable, 0);
+
+
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 10);
@@ -126,36 +131,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         graZ = (TextView) findViewById(R.id.graZ);
 
 
-        Button b = (Button) findViewById(R.id.button);
-        b.setText("start");
-        b.setOnClickListener(new View.OnClickListener() {
 
-            @Override
-            public void onClick(View v) {
-                Button b = (Button) v;
-
-
-                if (b.getText().equals("stop")) {
-//                    sm.stop();
-                    timerHandler.removeCallbacks(timerRunnable);
-                    b.setText("start");
-
-                    //unbindService(instance);
-                    getApplicationContext().stopService(serviceIntent);
-
-
-                } else {
-
-                    serviceIntent = new Intent(getApplicationContext(), SensorService.class);
-
-                    getApplicationContext().startService(serviceIntent);
-
-
-                    timerHandler.postDelayed(timerRunnable, 0);
-                    b.setText("stop");
-                }
-            }
-        });
 
 
         Button connectBtn = findViewById(R.id.connectBtn);
@@ -192,205 +168,22 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 
 
-                //List<String> s = new ArrayList<String>();
-                for (BluetoothDevice bt : pairedDevices) {
-                    s.add(bt.getName());
-                    Log.d("testing:", bt.getName());
-                    if (bt.getName().equals("DESKTOP-3IKI16L")) {
-
-                       // service.connectToBluetooth(bt);
-
-//                        try {
-//                            socket = bt.createRfcommSocketToServiceRecord(uuid);
-//                            socket.connect();
-//                            outputStream = socket.getOutputStream();
-//
-//                        } catch (IOException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        if (socket.isConnected()) {
-//                            Log.d("testing:", "connected");
-//                        } else {
-//                            Log.d("testing:", "not connected");
-//                        }
-                    }
-                }
 
             }
         });
 
 
-        Button activity = (Button) findViewById(R.id.activity);
-        activity.setText("activity");
-        activity.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Log.d("testing:", "trying");
-                Button b = (Button) v;
-
-                new Thread(new Runnable() {
-                    public void run() {
-                        // a potentially time consuming task
-                        Log.d("testing:", "running");
-                        Process p;
-                        try {
-                            // Preform su to get root privledges
-                            String line;
-                            p = Runtime.getRuntime().exec("su");
-
-                            // Attempt to write a file to a root-only
-                            DataOutputStream os = new DataOutputStream(p.getOutputStream());
-                            os.writeBytes("dumpsys activity\n");
-
-
-                            // Close the terminal
-                            os.writeBytes("exit\n");
-                            os.flush();
-
-                            BufferedReader reader2 = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-                            while ((line = reader2.readLine()) != null) {
-                                Log.d("testing:", "output(e): " + line);
-                            }
-                            reader2.close();
-
-                            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                            //boolean a = false;
-                            while ((line = reader.readLine()) != null) {
-                                Log.d("testing:", "output: " + line);
-
-                            }
-
-
-                            reader.close();
-
-
-                            try {
-                                p.waitFor();
-                                if (p.exitValue() != 255) {
-
-                                    Log.d("testing:", "root");
-                                } else {
-                                    Log.d("testing:", "not root");
-                                }
-                            } catch (InterruptedException e) {
-                                e.getStackTrace();
-                            }
-                        } catch (IOException e) {
-                            e.getStackTrace();
-                        }
-
-                    }
-                }).start();
-
-//                    Log.d("testing:", "try process");
-//                    int read;
-//                    char[] buffer = new char[4096];
-//                    StringBuffer output = new StringBuffer();
-//                    while ((read = reader.read(buffer)) > 0) {
-//                        output.append(buffer, 0, read);
-//                    }
-
-
-                //Log.d("testing:", "output: "+output.toString());
-
-
-//                List<ActivityManager.RunningAppProcessInfo> procInfos = am
-//                        .getRunningAppProcesses();
-//
-//
-//
-//                for (int idx = 0; idx < procInfos.size(); idx++) {
-//
-//                    Log.d("testing:",procInfos.get(idx).processName );
-//                }
-
-
-//                try {
-//                    Process p = Runtime.getRuntime().exec(new String[]{"adb","shell","ps","-A"});
-//                    BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-//                    Log.d("testing:","try process");
-//                    int read;
-//                    char[] buffer = new char[4096];
-//                    StringBuffer output = new StringBuffer();
-//                    while ((read = reader.read(buffer)) > 0) {
-//                        output.append(buffer, 0, read);
-//                    }
-//                    reader.close();
-//
-//                    p.waitFor();
-//
-//                    Log.d("testing:",output.toString());
-//                    Toast.makeText(getApplicationContext(),output.toString(),Toast.LENGTH_LONG).show();
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                } catch (InterruptedException e) {
-//                    e.printStackTrace();
-//                }
-            }
-        });
 
 
     }
 
 
-    private void threadwork() {
-        Process p;
-        try {
-            // Preform su to get root privledges
-            String line;
-            p = Runtime.getRuntime().exec("su");
 
-            // Attempt to write a file to a root-only
-            DataOutputStream os = new DataOutputStream(p.getOutputStream());
-            os.writeBytes("getevent -lt /dev/input/event1\n");
-
-
-            // Close the terminal
-            os.writeBytes("exit\n");
-            os.flush();
-
-            BufferedReader reader2 = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-            while ((line = reader2.readLine()) != null) {
-                Log.d("testing:", "output(e): " + line);
-            }
-            reader2.close();
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            while ((line = reader.readLine()) != null) {
-                Log.d("testing:", "output: " + line);
-            }
-
-
-            reader.close();
-
-
-            try {
-                p.waitFor();
-                if (p.exitValue() != 255) {
-
-                    Log.d("testing:", "root");
-                } else {
-                    Log.d("testing:", "not root");
-                }
-            } catch (InterruptedException e) {
-                e.getStackTrace();
-            }
-        } catch (IOException e) {
-            e.getStackTrace();
-        }
-
-
-    }
 
     @Override
     public void onPause() {
         super.onPause();
         timerHandler.removeCallbacks(timerRunnable);
-        Button b = (Button) findViewById(R.id.button);
-        b.setText("start");
 
         //accelerometer.mSensorManager.unregisterListener(accelerometer);
         //unbindService(this);
