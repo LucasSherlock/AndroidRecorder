@@ -73,7 +73,7 @@ public class    Gesture implements Serializable {
     public String toString() {
         List<String> stringList = new ArrayList<>();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd_hh:mm:ss.SSS");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd_HH:mm:ss.SSS");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(startTime);
         String start = sdf.format(calendar.getTime());
