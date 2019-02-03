@@ -53,8 +53,8 @@ public class SensorService extends Service {
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
     BluetoothSocket socket = null;
     OutputStream outputStream;
+    private boolean isConnected;
 
-    ActivityManager am;
 
     private WindowManager mWindowManager;
     private LinearLayout touchLayout;
@@ -87,8 +87,7 @@ public class SensorService extends Service {
         Toast.makeText(getBaseContext(), "onCreate", Toast.LENGTH_LONG).show();
 
 
-        am = (ActivityManager) SensorService.this.getSystemService(ACTIVITY_SERVICE);
-
+        isConnected = false;
 
         Log.d("testing:", "service created");
 
@@ -186,6 +185,7 @@ public class SensorService extends Service {
         }
 
         if (socket.isConnected()) {
+            isConnected = true;
             Log.d("testing:", "connected");
         } else {
             Log.d("testing:", "not connected");
@@ -202,7 +202,6 @@ public class SensorService extends Service {
         totalRX = TrafficStats.getTotalRxBytes();
         totalTX = TrafficStats.getTotalTxBytes();
     }
-
 
     private void checkPhoneState() {
         boolean isScreenOn;
@@ -230,6 +229,7 @@ public class SensorService extends Service {
         }
 
     }
+
 
     public void outputFile(String content) {
 
@@ -261,47 +261,50 @@ public class SensorService extends Service {
         @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void run() {
-
-            sound = (int) Math.round(soundMeter.getAmplitude());
-            accX = accelerometer.getX();
-            accY = accelerometer.getY();
-            accZ = accelerometer.getZ();
-            rotX = gyroscope.getX();
-            rotY = gyroscope.getY();
-            rotZ = gyroscope.getZ();
-            graX = gravitySensor.getX();
-            graY = gravitySensor.getY();
-            graZ = gravitySensor.getZ();
-            networkUsage();
-            checkPhoneState();
-
-            List<String> outputList = new ArrayList<>();
-            outputList.add(Integer.toString(sound));
-            outputList.add(Float.toString(accX));
-            outputList.add(Float.toString(accY));
-            outputList.add(Float.toString(accZ));
-            outputList.add(Float.toString(rotX));
-            outputList.add(Float.toString(rotY));
-            outputList.add(Float.toString(rotZ));
-            outputList.add(Float.toString(graX));
-            outputList.add(Float.toString(graY));
-            outputList.add(Float.toString(graZ));
-            outputList.add(currentActivity);
-            outputList.add(screenStatus);
-            outputList.add(Long.toString(rxBytes));
-            outputList.add(Long.toString(txBytes));
-
-
-            String send = android.text.TextUtils.join(",", outputList);
-
-            outputFile(send);
-            //checkCurrent();
-            //
-
-
+            if(isConnected) {
+                String output = outputToString();
+                outputFile(output);
+            }
             timerHandler.postDelayed(this, 200);
         }
     };
+
+    private String outputToString() {
+        sound = (int) Math.round(soundMeter.getAmplitude());
+        accX = accelerometer.getX();
+        accY = accelerometer.getY();
+        accZ = accelerometer.getZ();
+        rotX = gyroscope.getX();
+        rotY = gyroscope.getY();
+        rotZ = gyroscope.getZ();
+        graX = gravitySensor.getX();
+        graY = gravitySensor.getY();
+        graZ = gravitySensor.getZ();
+        networkUsage();
+        checkPhoneState();
+
+        List<String> outputList = new ArrayList<>();
+        outputList.add(Integer.toString(sound));
+        outputList.add(Float.toString(accX));
+        outputList.add(Float.toString(accY));
+        outputList.add(Float.toString(accZ));
+        outputList.add(Float.toString(rotX));
+        outputList.add(Float.toString(rotY));
+        outputList.add(Float.toString(rotZ));
+        outputList.add(Float.toString(graX));
+        outputList.add(Float.toString(graY));
+        outputList.add(Float.toString(graZ));
+        outputList.add(currentActivity);
+        outputList.add(screenStatus);
+        outputList.add(Long.toString(rxBytes));
+        outputList.add(Long.toString(txBytes));
+
+
+        String send = android.text.TextUtils.join(",", outputList);
+        return send;
+    }
+
+    //=================== Getters ====================//
 
     public int getSound() {
         return sound;
