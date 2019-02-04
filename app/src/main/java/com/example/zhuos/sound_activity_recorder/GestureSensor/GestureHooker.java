@@ -1,24 +1,18 @@
-package com.example.zhuos.sound_activity_recorder;
+package com.example.zhuos.sound_activity_recorder.GestureSensor;
 
-import android.app.Activity;
 import android.app.AndroidAppHelper;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v4.view.GestureDetectorCompat;
-import android.support.v4.view.MotionEventCompat;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Timer;
-
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
 
+import static com.example.zhuos.sound_activity_recorder.GestureSensor.GestureType.*;
 import static de.robv.android.xposed.XposedHelpers.findAndHookMethod;
 
 public class GestureHooker implements IXposedHookLoadPackage {
@@ -104,7 +98,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
 
-                gesture = new Gesture(currentTime, currentTime, event.getRawX(), event.getRawY(), event.getRawX(), event.getRawY(), GestureType.Start);
+                gesture = new Gesture(currentTime, currentTime, event.getRawX(), event.getRawY(), event.getRawX(), event.getRawY(), Start);
 
                 break;
 
@@ -118,15 +112,15 @@ public class GestureHooker implements IXposedHookLoadPackage {
                         switch (gesture.getType()) {
                             case Start:
                                 if (gesture.getStartX() - event.getRawX() > MOVE_MIN_THRESHOLD) {//swipe left
-                                    gesture.setType(GestureType.MoveLeft);
+                                    gesture.setType(MoveLeft);
                                 } else if (gesture.getStartX() - event.getRawX() < -MOVE_MIN_THRESHOLD) {//swipe right
-                                    gesture.setType(GestureType.MoveRight);
+                                    gesture.setType(MoveRight);
                                 } else if (gesture.getStartY() - event.getRawY() > MOVE_MIN_THRESHOLD) {//swipe up
-                                    gesture.setType(GestureType.MoveUp);
+                                    gesture.setType(MoveUp);
                                 } else if (gesture.getStartY() - event.getRawY() < -MOVE_MIN_THRESHOLD) {//swipe down
-                                    gesture.setType(GestureType.MoveDown);
+                                    gesture.setType(MoveDown);
                                 } else {
-                                    gesture.setType(GestureType.Move);
+                                    gesture.setType(Move);
                                 }
                                 break;
 
@@ -134,7 +128,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                                 if (gesture.getStartX() - event.getRawX() > MOVE_HMAX_THRESHOLD ||//too much to the left
                                         gesture.getStartX() - event.getRawX() < -MOVE_HMAX_THRESHOLD ||//to the right
                                         gesture.getStartY() - event.getRawY() < -MOVE_MIN_THRESHOLD) {//moving down
-                                    gesture.setType(GestureType.Move);
+                                    gesture.setType(Move);
                                 }
                                 break;
 
@@ -142,7 +136,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                                 if (gesture.getStartX() - event.getRawX() > MOVE_HMAX_THRESHOLD ||//too much to the left
                                         gesture.getStartX() - event.getRawX() < -MOVE_HMAX_THRESHOLD ||//to the right
                                         gesture.getStartY() - event.getRawY() > MOVE_MIN_THRESHOLD) {//moving up
-                                    gesture.setType(GestureType.Move);
+                                    gesture.setType(Move);
                                 }
                                 break;
 
@@ -150,7 +144,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                                 if (gesture.getStartY() - event.getRawY() > MOVE_VMAX_THRESHOLD ||//too much up
                                         gesture.getStartY() - event.getRawY() < -MOVE_VMAX_THRESHOLD ||//down
                                         gesture.getStartX() - event.getRawX() < -MOVE_MIN_THRESHOLD) {//right
-                                    gesture.setType(GestureType.Move);
+                                    gesture.setType(Move);
                                 }
                                 break;
 
@@ -158,7 +152,7 @@ public class GestureHooker implements IXposedHookLoadPackage {
                                 if (gesture.getStartY() - event.getRawY() > MOVE_VMAX_THRESHOLD ||//too much up
                                         gesture.getStartY() - event.getRawY() < -MOVE_VMAX_THRESHOLD ||//down
                                         gesture.getStartX() - event.getRawX() > MOVE_MIN_THRESHOLD) {//left
-                                    gesture.setType(GestureType.Move);
+                                    gesture.setType(Move);
                                 }
                                 break;
 
@@ -177,9 +171,9 @@ public class GestureHooker implements IXposedHookLoadPackage {
 
             case MotionEvent.ACTION_POINTER_DOWN:
                 if (event.getPointerCount() == 2) {
-                    gesture.setType(GestureType.TwoFingers);
+                    gesture.setType(TwoFingers);
                 } else if (event.getPointerCount() > 2) {
-                    gesture.setType(GestureType.MultiFingers);
+                    gesture.setType(MultiFingers);
                 }
                 gesture.setCurrentTime(currentTime);
                 gesture.setCurrentX(event.getRawX());
@@ -198,11 +192,11 @@ public class GestureHooker implements IXposedHookLoadPackage {
                 return "Outside";
             case MotionEvent.ACTION_UP:
 
-                if (gesture.getType() == GestureType.Start) {
+                if (gesture.getType() == Start) {
                     if (currentTime - gesture.getStartTime() > 500) {
-                        gesture.setType(GestureType.LongPress);
+                        gesture.setType(LongPress);
                     } else {
-                        gesture.setType(GestureType.Tap);
+                        gesture.setType(Tap);
                     }
                 }
 

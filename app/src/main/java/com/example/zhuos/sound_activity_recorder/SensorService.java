@@ -1,9 +1,7 @@
 package com.example.zhuos.sound_activity_recorder;
 
-import android.app.ActivityManager;
 import android.app.KeyguardManager;
 import android.app.Service;
-import android.app.usage.NetworkStats;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
@@ -31,10 +29,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.example.zhuos.sound_activity_recorder.ActivitySensor.ActivityReceiver;
 import com.example.zhuos.sound_activity_recorder.sensors.Accelerometer;
 import com.example.zhuos.sound_activity_recorder.sensors.GravitySensor;
 import com.example.zhuos.sound_activity_recorder.sensors.Gyroscope;
 import com.example.zhuos.sound_activity_recorder.sensors.SoundMeter;
+
+import com.example.zhuos.sound_activity_recorder.GestureSensor.GestureReceiver;
 
 
 public class SensorService extends Service {

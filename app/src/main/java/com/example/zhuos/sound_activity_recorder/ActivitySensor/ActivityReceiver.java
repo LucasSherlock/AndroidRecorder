@@ -1,9 +1,11 @@
-package com.example.zhuos.sound_activity_recorder;
+package com.example.zhuos.sound_activity_recorder.ActivitySensor;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+
+import com.example.zhuos.sound_activity_recorder.SensorService;
 
 public class ActivityReceiver extends BroadcastReceiver {
 

@@ -1,4 +1,4 @@
-package com.example.zhuos.sound_activity_recorder;
+package com.example.zhuos.sound_activity_recorder.ActivitySensor;
 
 import android.app.Activity;
 import android.app.AndroidAppHelper;
