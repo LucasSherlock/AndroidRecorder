@@ -14,11 +14,13 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +32,9 @@ import java.util.List;
 import java.util.UUID;
 
 import com.example.zhuos.sound_activity_recorder.ActivitySensor.ActivityReceiver;
+import com.example.zhuos.sound_activity_recorder.Audio.calculators.AudioCalculator;
+import com.example.zhuos.sound_activity_recorder.Audio.core.Callback;
+import com.example.zhuos.sound_activity_recorder.Audio.core.Recorder;
 import com.example.zhuos.sound_activity_recorder.sensors.Accelerometer;
 import com.example.zhuos.sound_activity_recorder.sensors.GravitySensor;
 import com.example.zhuos.sound_activity_recorder.sensors.Gyroscope;
@@ -49,6 +54,9 @@ public class SensorService extends Service {
     private GravitySensor gravitySensor;
     private ActivityReceiver activityReceiver;
     private GestureReceiver gestureReceiver;
+    private Recorder recorder;
+    AudioCalculator audioCalculator;
+    private Handler handler;
 
 
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
@@ -61,7 +69,7 @@ public class SensorService extends Service {
     private LinearLayout touchLayout;
 
 
-    private int sound;
+    private int sound, freq;
     private float accX, accY, accZ, rotX, rotY, rotZ, graX, graY, graZ;
     private String currentActivity;
     private long totalRX, totalTX, rxBytes, txBytes;
@@ -115,8 +123,8 @@ public class SensorService extends Service {
         currentActivity = "com.example.zhuos.sound_activity_recorder.MainActivity";
 
 
-        soundMeter = new SoundMeter();
-        soundMeter.start();
+       // soundMeter = new SoundMeter();
+        //soundMeter.start();
 
         accelerometer = new Accelerometer(this);
         accelerometer.mSensorManager.registerListener(accelerometer, accelerometer.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -147,10 +155,42 @@ public class SensorService extends Service {
         gestureReceiver.setService(this);
 
 
-        timerHandler.postDelayed(timerRunnable, 0);
+        recorder = new Recorder(callback);
+        audioCalculator = new AudioCalculator();
+        handler = new Handler(Looper.getMainLooper());
 
+
+        timerHandler.postDelayed(timerRunnable, 0);
+        recorder.start();
 
     }
+
+
+    private Callback callback = new Callback() {
+
+        @Override
+        public void onBufferAvailable(byte[] buffer) {
+            audioCalculator.setBytes(buffer);
+            int amplitude = audioCalculator.getAmplitude();
+            double decibel = audioCalculator.getDecibel();
+            final double frequency = audioCalculator.getFrequency();
+
+            final String amp = String.valueOf(amplitude + " Amp");
+            final String db = String.valueOf(decibel + " db");
+            final String hz = String.valueOf(frequency + " Hz");
+
+
+
+            sound = (int) decibel;
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    freq = (int) frequency;
+                    // freqV.setText(hz);
+                }
+            });
+        }
+    };
 
 
     @Override
@@ -231,6 +271,21 @@ public class SensorService extends Service {
 
     }
 
+    private void updateData(){
+        //sound = (int) Math.round(soundMeter.getAmplitude());
+        accX = accelerometer.getX();
+        accY = accelerometer.getY();
+        accZ = accelerometer.getZ();
+        rotX = gyroscope.getX();
+        rotY = gyroscope.getY();
+        rotZ = gyroscope.getZ();
+        graX = gravitySensor.getX();
+        graY = gravitySensor.getY();
+        graZ = gravitySensor.getZ();
+        //freq = (int)audioCalculator.getFrequency();
+        networkUsage();
+        checkPhoneState();
+    }
 
     public void outputFile(String content) {
 
@@ -262,7 +317,11 @@ public class SensorService extends Service {
         @RequiresApi(api = Build.VERSION_CODES.M)
         @Override
         public void run() {
-            if(isConnected) {
+
+            //  Log.d("testingss:", audioCalculator.getFrequency() + "");
+
+updateData();
+            if (isConnected) {
                 String output = outputToString();
                 outputFile(output);
             }
@@ -271,18 +330,18 @@ public class SensorService extends Service {
     };
 
     private String outputToString() {
-        sound = (int) Math.round(soundMeter.getAmplitude());
-        accX = accelerometer.getX();
-        accY = accelerometer.getY();
-        accZ = accelerometer.getZ();
-        rotX = gyroscope.getX();
-        rotY = gyroscope.getY();
-        rotZ = gyroscope.getZ();
-        graX = gravitySensor.getX();
-        graY = gravitySensor.getY();
-        graZ = gravitySensor.getZ();
-        networkUsage();
-        checkPhoneState();
+//        sound = (int) Math.round(soundMeter.getAmplitude());
+//        accX = accelerometer.getX();
+//        accY = accelerometer.getY();
+//        accZ = accelerometer.getZ();
+//        rotX = gyroscope.getX();
+//        rotY = gyroscope.getY();
+//        rotZ = gyroscope.getZ();
+//        graX = gravitySensor.getX();
+//        graY = gravitySensor.getY();
+//        graZ = gravitySensor.getZ();
+//        networkUsage();
+//        checkPhoneState();
 
         List<String> outputList = new ArrayList<>();
         outputList.add(Integer.toString(sound));
@@ -345,6 +404,10 @@ public class SensorService extends Service {
 
     public float getGraZ() {
         return graZ;
+    }
+
+    public int getFreq(){
+        return  freq;
     }
 
     public void setCurrentActivity(String currentActivity) {

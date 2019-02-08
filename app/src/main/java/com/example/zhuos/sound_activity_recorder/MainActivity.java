@@ -21,6 +21,7 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +32,10 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.zhuos.sound_activity_recorder.Audio.calculators.AudioCalculator;
+import com.example.zhuos.sound_activity_recorder.Audio.core.Callback;
+import com.example.zhuos.sound_activity_recorder.Audio.core.Recorder;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -58,9 +63,13 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
     //private Accelerometer accelerometer;
 
-    TextView timerTextView, accX, accY, accZ,rotX,rotY,rotZ, graX,graY,graZ;
+    TextView timerTextView, accX, accY, accZ,rotX,rotY,rotZ, graX,graY,graZ, freq;
     private UUID uuid = UUID.fromString("6bfc8497-b445-406e-b639-a5abaf4d9739");
 
+
+    private Recorder recorder;
+    private AudioCalculator audioCalculator;
+    private Handler handler;
 
     //runs without a timer by reposting this handler at the end of the runnable
     Handler timerHandler = new Handler();
@@ -68,10 +77,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
         @Override
         public void run() {
-
-            Log.d("testing:", "checking");
             if (service != null) {
-                Log.d("testing:", "not null");
+                Log.d("testing:", "not null" + service.getSound());
                 timerTextView.setText(service.getSound() + " db");
                 accX.setText("acc X : " + service.getAccX());
                 accY.setText("acc Y : " + service.getAccY());
@@ -82,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                 graX.setText("gra X : " + service.getGraX());
                 graY.setText("gra Y : " + service.getGraY());
                 graZ.setText("gra Z : " + service.getGraZ());
+                freq.setText("Frequency: " + service.getFreq());
             } else {
                 Log.d("testing:", " null");
             }
@@ -103,9 +111,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
 
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 10);
-
         }
 
         am = (ActivityManager) this.getSystemService(Activity.ACTIVITY_SERVICE);
@@ -129,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         graX = (TextView) findViewById(R.id.graX);
         graY = (TextView) findViewById(R.id.graY);
         graZ = (TextView) findViewById(R.id.graZ);
-
+        freq = (TextView) findViewById(R.id.freq);
 
 
 
@@ -164,16 +170,8 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                     }
                 });
                 builder.show();
-
-
-
-
-
             }
         });
-
-
-
 
     }
 
@@ -192,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     @Override
     protected void onResume() {
         super.onResume();
+        //recorder.start();
         //accelerometer.mSensorManager.registerListener(accelerometer, accelerometer.mSensor, SensorManager.SENSOR_DELAY_NORMAL);
         //serviceIntent = new Intent(this, SensorService.class);
         //Intent intent = new Intent(getApplicationContext(), SensorService.class);
@@ -208,12 +207,14 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
     }
 
 
+
+    //===================== Service Connection ========================//
+
     @Override
     public void onServiceConnected(ComponentName name, IBinder binder) {
         SensorService.LocalBinder b = (SensorService.LocalBinder) binder;
         service = b.getService();
         Log.d("testing:", "service is connected");
-        Toast.makeText(MainActivity.this, "Connected", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -221,4 +222,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         Log.d("testing:", "service is disconnected");
         service = null;
     }
+
+
 }

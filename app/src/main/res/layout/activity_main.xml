@@ -16,19 +16,19 @@
         android:text="TextView"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/rotY"
-        app:layout_constraintStart_toStartOf="@+id/accX"
+        app:layout_constraintStart_toStartOf="@+id/accY"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/connectBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="136dp"
+        android:layout_marginStart="32dp"
         android:layout_marginBottom="95dp"
         android:text="Connect"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/graZ" />
+        app:layout_constraintStart_toStartOf="@+id/freq"
+        app:layout_constraintTop_toBottomOf="@+id/freq" />
 
     <TextView
         android:id="@+id/accX"
@@ -38,7 +38,7 @@
         android:text="TextView"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/accY"
-        app:layout_constraintStart_toStartOf="@+id/accY"
+        app:layout_constraintStart_toStartOf="@+id/timerTextView"
         app:layout_constraintTop_toBottomOf="@+id/timerTextView" />
 
     <TextView
@@ -71,7 +71,7 @@
         android:layout_marginEnd="17dp"
         android:text="TextView"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/graZ"
+        app:layout_constraintBottom_toTopOf="@+id/rotZ"
         app:layout_constraintEnd_toStartOf="@+id/graY"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/rotY" />
@@ -88,7 +88,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/graZ"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rotY" />
+        app:layout_constraintTop_toBottomOf="@+id/rotX" />
 
     <TextView
         android:id="@+id/rotY"
@@ -96,10 +96,9 @@
         android:layout_height="0dp"
         android:layout_marginStart="26dp"
         android:layout_marginEnd="17dp"
-        android:layout_marginBottom="29dp"
         android:text="TextView"
         android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/rotZ"
+        app:layout_constraintBottom_toTopOf="@+id/rotX"
         app:layout_constraintEnd_toStartOf="@+id/graX"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/timerTextView" />
@@ -121,9 +120,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginEnd="11dp"
-        android:layout_marginBottom="96dp"
+        android:layout_marginBottom="27dp"
         android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/connectBtn"
+        app:layout_constraintBottom_toTopOf="@+id/freq"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/rotZ"
         app:layout_constraintTop_toBottomOf="@+id/graY" />
@@ -139,5 +138,18 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/rotX"
         app:layout_constraintTop_toBottomOf="@+id/graX" />
+
+    <TextView
+        android:id="@+id/freq"
+        android:layout_width="204dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="76dp"
+        android:layout_marginEnd="76dp"
+        android:layout_marginBottom="35dp"
+        android:text="TextView"
+        app:layout_constraintBottom_toTopOf="@+id/connectBtn"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/rotZ"
+        app:layout_constraintTop_toBottomOf="@+id/graZ" />
 
 </android.support.constraint.ConstraintLayout>
